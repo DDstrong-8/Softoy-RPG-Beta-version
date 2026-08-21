@@ -1,0 +1,1773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>Softoy World — Prototype 1</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+    background: #10151c;
+    color: white;
+    touch-action: none;
+}
+
+button {
+    font-family: inherit;
+    border: none;
+    cursor: pointer;
+}
+
+#game {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* =====================================================
+   TOP HUD
+   ===================================================== */
+
+#hud {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    z-index: 20;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    pointer-events: none;
+}
+
+.hud-box {
+    background: rgba(20, 25, 35, .9);
+    border: 2px solid rgba(255,255,255,.25);
+    border-radius: 14px;
+    padding: 8px 12px;
+    font-size: 14px;
+    box-shadow: 0 5px 15px rgba(0,0,0,.3);
+}
+
+#settingsButton {
+    pointer-events: auto;
+    background: rgba(20,25,35,.95);
+    color: white;
+    border: 2px solid rgba(255,255,255,.25);
+    border-radius: 12px;
+    padding: 9px 13px;
+    font-size: 18px;
+}
+
+/* =====================================================
+   MAP
+   ===================================================== */
+
+#map {
+    position: absolute;
+    width: 1800px;
+    height: 1200px;
+
+    background:
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,.12) 0 3px, transparent 4px),
+        radial-gradient(circle at 80% 40%, rgba(255,255,255,.10) 0 4px, transparent 5px),
+        linear-gradient(135deg, #8fcf78, #6eaf68);
+
+    background-size: 140px 140px, 190px 190px, auto;
+
+    left: 50%;
+    top: 50%;
+
+    transform: translate(-50%, -50%);
+}
+
+/* Pillow-like hills */
+
+.pillow {
+    position: absolute;
+    background: rgba(255,255,255,.32);
+    border-radius: 45%;
+    box-shadow: inset 0 -15px 25px rgba(0,0,0,.08);
+}
+
+.p1 {
+    width: 300px;
+    height: 170px;
+    left: 250px;
+    top: 160px;
+}
+
+.p2 {
+    width: 250px;
+    height: 150px;
+    left: 850px;
+    top: 260px;
+}
+
+.p3 {
+    width: 340px;
+    height: 190px;
+    left: 1200px;
+    top: 720px;
+}
+
+/* Paths */
+
+.path {
+    position: absolute;
+    background: #d7b982;
+    border-radius: 40px;
+    opacity: .9;
+}
+
+.path.horizontal {
+    height: 75px;
+}
+
+.path.vertical {
+    width: 75px;
+}
+
+/* Village */
+
+#village {
+    position: absolute;
+    left: 820px;
+    top: 540px;
+    width: 170px;
+    height: 130px;
+    background: #d9b47c;
+    border: 5px solid #8e6740;
+    border-radius: 25px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-weight: bold;
+    color: #4b3421;
+}
+
+/* =====================================================
+   PLAYER
+   ===================================================== */
+
+#player {
+    position: absolute;
+    width: 52px;
+    height: 52px;
+    border-radius: 50% 50% 42% 42%;
+    background: #f5f5f5;
+    border: 4px solid #222;
+    z-index: 10;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-size: 28px;
+    user-select: none;
+}
+
+.player-face {
+    position: relative;
+    top: 1px;
+}
+
+/* =====================================================
+   ENEMIES
+   ===================================================== */
+
+.enemy {
+    position: absolute;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #c94c4c;
+    border: 4px solid #601f1f;
+    z-index: 8;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-size: 25px;
+}
+
+.enemy.green {
+    outline: 4px solid #35d46b;
+}
+
+.enemy.yellow {
+    outline: 4px solid #f4d03f;
+}
+
+.enemy.red {
+    outline: 4px solid #e74c3c;
+}
+
+/* =====================================================
+   SECRET CAVE
+   ===================================================== */
+
+#caveEntrance {
+    position: absolute;
+    left: 250px;
+    top: 800px;
+    width: 90px;
+    height: 70px;
+
+    background: #242424;
+    border-radius: 50% 50% 20% 20%;
+    border: 5px solid #111;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    color: white;
+    font-size: 12px;
+    text-align: center;
+}
+
+/* =====================================================
+   CONTROLS
+   ===================================================== */
+
+#controls {
+    position: absolute;
+    left: 20px;
+    bottom: 20px;
+    z-index: 30;
+}
+
+.dpad {
+    width: 170px;
+    height: 170px;
+    position: relative;
+}
+
+.control {
+    position: absolute;
+    width: 58px;
+    height: 58px;
+
+    background: rgba(20,25,35,.88);
+    color: white;
+
+    border: 2px solid rgba(255,255,255,.25);
+    border-radius: 14px;
+
+    font-size: 25px;
+}
+
+.control:active {
+    transform: scale(.92);
+    background: rgba(60,70,90,.95);
+}
+
+.up {
+    left: 56px;
+    top: 0;
+}
+
+.down {
+    left: 56px;
+    bottom: 0;
+}
+
+.left {
+    left: 0;
+    top: 56px;
+}
+
+.right {
+    right: 0;
+    top: 56px;
+}
+
+/* =====================================================
+   BATTLE SCREEN
+   ===================================================== */
+
+#battleScreen {
+    position: absolute;
+    inset: 0;
+    z-index: 100;
+
+    display: none;
+
+    background:
+        linear-gradient(
+            rgba(20,25,35,.25),
+            rgba(20,25,35,.65)
+        ),
+        linear-gradient(135deg, #8fb8d8, #506b91);
+}
+
+.battleArena {
+    position: absolute;
+    inset: 0;
+}
+
+.battleEnemy {
+    position: absolute;
+    top: 18%;
+    left: 68%;
+
+    width: 130px;
+    height: 130px;
+
+    border-radius: 50%;
+    background: #c94c4c;
+    border: 8px solid #651e1e;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-size: 65px;
+
+    box-shadow: 0 20px 30px rgba(0,0,0,.3);
+}
+
+.battlePlayer {
+    position: absolute;
+    bottom: 31%;
+    left: 18%;
+
+    width: 140px;
+    height: 140px;
+
+    border-radius: 50%;
+    background: #f5f5f5;
+    border: 8px solid #222;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-size: 70px;
+
+    box-shadow: 0 20px 30px rgba(0,0,0,.3);
+}
+
+/* Battle info */
+
+.battleInfo {
+    position: absolute;
+    top: 12%;
+    left: 10%;
+    background: rgba(20,25,35,.9);
+    border-radius: 14px;
+    padding: 12px;
+    min-width: 180px;
+}
+
+.enemyInfo {
+    position: absolute;
+    top: 8%;
+    right: 7%;
+    background: rgba(20,25,35,.9);
+    border-radius: 14px;
+    padding: 12px;
+    min-width: 180px;
+}
+
+.name {
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+
+.bar {
+    height: 13px;
+    width: 160px;
+    background: #222;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.bar-fill {
+    height: 100%;
+    background: #53d36c;
+    width: 100%;
+}
+
+.energy-fill {
+    background: #4ca9e8;
+}
+
+/* Battle menu */
+
+#battleMenu {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+    background: rgba(15,18,25,.96);
+
+    padding: 15px;
+
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.battleButton {
+    min-height: 55px;
+
+    background: #303847;
+    color: white;
+
+    border: 2px solid rgba(255,255,255,.15);
+    border-radius: 12px;
+
+    font-size: 16px;
+}
+
+.battleButton:active {
+    transform: scale(.96);
+}
+
+/* Battle message */
+
+#battleMessage {
+    position: absolute;
+    bottom: 160px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    width: min(90%, 600px);
+
+    background: rgba(10,12,18,.94);
+    border: 2px solid rgba(255,255,255,.2);
+
+    padding: 14px;
+    border-radius: 14px;
+
+    text-align: center;
+
+    font-size: 16px;
+}
+
+/* =====================================================
+   SETTINGS
+   ===================================================== */
+
+#settingsPanel {
+    position: absolute;
+    inset: 0;
+    z-index: 200;
+
+    display: none;
+
+    background: rgba(0,0,0,.65);
+
+    justify-content: center;
+    align-items: center;
+}
+
+.settingsCard {
+    width: min(90%, 400px);
+    background: #202633;
+    border-radius: 20px;
+    padding: 25px;
+    text-align: center;
+}
+
+.settingsCard h2 {
+    margin-top: 0;
+}
+
+.settingButton {
+    width: 100%;
+    padding: 14px;
+    margin-top: 10px;
+
+    background: #343d50;
+    color: white;
+
+    border-radius: 12px;
+
+    font-size: 16px;
+}
+
+/* =====================================================
+   NOTIFICATIONS
+   ===================================================== */
+
+#notification {
+    position: absolute;
+    left: 50%;
+    top: 80px;
+
+    transform: translateX(-50%);
+
+    background: rgba(20,25,35,.95);
+
+    border: 2px solid rgba(255,255,255,.2);
+
+    padding: 12px 18px;
+
+    border-radius: 14px;
+
+    display: none;
+
+    z-index: 300;
+
+    text-align: center;
+}
+</style>
+</head>
+
+<body>
+
+<div id="game">
+
+    <!-- =================================================
+         HUD
+         ================================================= -->
+
+    <div id="hud">
+
+        <div class="hud-box">
+            ❤️ HP: <span id="hudHP">100</span>/100
+            &nbsp;&nbsp;
+            ⭐ EXP: <span id="hudEXP">0</span>
+            &nbsp;&nbsp;
+            🪙 DD: <span id="hudCoins">0</span>
+        </div>
+
+        <button id="settingsButton">⚙️</button>
+
+    </div>
+
+
+    <!-- =================================================
+         MAP
+         ================================================= -->
+
+    <div id="map">
+
+        <div class="pillow p1"></div>
+        <div class="pillow p2"></div>
+        <div class="pillow p3"></div>
+
+        <div class="path horizontal"
+             style="left:250px; top:500px; width:1200px;"></div>
+
+        <div class="path vertical"
+             style="left:880px; top:300px; height:600px;"></div>
+
+        <div id="village">
+            🏠<br>
+            SOFTOY<br>
+            VILLAGE
+        </div>
+
+        <div id="caveEntrance">
+            🕳️<br>
+            LOST<br>
+            CAVES
+        </div>
+
+        <!-- Enemies -->
+
+        <div class="enemy green"
+             data-level="4"
+             style="left:550px; top:450px;">
+            👹
+        </div>
+
+        <div class="enemy green"
+             data-level="7"
+             style="left:1120px; top:410px;">
+            👹
+        </div>
+
+        <div class="enemy yellow"
+             data-level="12"
+             style="left:1350px; top:600px;">
+            👹
+        </div>
+
+        <div class="enemy red"
+             data-level="18"
+             style="left:430px; top:720px;">
+            👹
+        </div>
+
+        <!-- Player -->
+
+        <div id="player">
+            <span class="player-face">🙂</span>
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         CONTROLS
+         ================================================= -->
+
+    <div id="controls">
+
+        <div class="dpad">
+
+            <button class="control up" data-dir="up">▲</button>
+            <button class="control down" data-dir="down">▼</button>
+            <button class="control left" data-dir="left">◀</button>
+            <button class="control right" data-dir="right">▶</button>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         BATTLE SCREEN
+         ================================================= -->
+
+    <div id="battleScreen">
+
+        <div class="battleArena">
+
+            <div class="battleEnemy">
+                👹
+            </div>
+
+            <div class="enemyInfo">
+
+                <div class="name">
+                    Wild Enemy Lv. <span id="battleEnemyLevel">?</span>
+                </div>
+
+                <div class="bar">
+                    <div id="enemyHPBar"
+                         class="bar-fill"></div>
+                </div>
+
+            </div>
+
+
+            <div class="battlePlayer">
+                🙂
+            </div>
+
+            <div class="battleInfo">
+
+                <div class="name">
+                    Hechie
+                </div>
+
+                <div>
+                    HP:
+                    <span id="battlePlayerHP">
+                        100
+                    </span>/100
+                </div>
+
+                <div class="bar">
+                    <div id="playerHPBar"
+                         class="bar-fill"></div>
+                </div>
+
+                <br>
+
+                <div>
+                    Energy:
+                    <span id="battleEnergy">
+                        100
+                    </span>/100
+                </div>
+
+                <div class="bar">
+                    <div id="energyBar"
+                         class="bar-fill energy-fill"></div>
+                </div>
+
+            </div>
+
+
+            <div id="battleMessage">
+                A wild enemy appeared!
+            </div>
+
+
+            <div id="battleMenu">
+
+                <button class="battleButton"
+                        id="attackButton">
+                    ⚔️ Attack
+                </button>
+
+                <button class="battleButton"
+                        id="defendButton">
+                    🛡️ Defend
+                </button>
+
+                <button class="battleButton"
+                        id="abilityButton">
+                    ✨ Ability
+                </button>
+
+                <button class="battleButton"
+                        id="itemButton">
+                    🎒 Item
+                </button>
+
+                <button class="battleButton"
+                        id="runButton">
+                    🏃 Run
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         SETTINGS
+         ================================================= -->
+
+    <div id="settingsPanel">
+
+        <div class="settingsCard">
+
+            <h2>⚙️ Settings</h2>
+
+            <button class="settingButton"
+                    id="musicButton">
+                🎵 Music: OFF
+            </button>
+
+            <button class="settingButton"
+                    id="saveButton">
+                💾 Save Game
+            </button>
+
+            <button class="settingButton"
+                    id="closeSettings">
+                Close
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <div id="notification"></div>
+
+</div>
+
+
+<script>
+
+/* =====================================================
+   GAME DATA
+   ===================================================== */
+
+const player = {
+
+    x: 905,
+    y: 600,
+
+    speed: 5,
+
+    maxHP: 100,
+    hp: 100,
+
+    attack: 20,
+    defense: 5,
+    speedStat: 30,
+
+    energy: 100,
+    maxEnergy: 100,
+
+    level: 1,
+    exp: 0,
+
+    coins: 0
+
+};
+
+
+let currentEnemy = null;
+
+let battleEnemyHP = 100;
+let battleEnemyMaxHP = 100;
+
+let battleEnemyAttack = 15;
+let battleEnemyDefense = 3;
+
+let battleDefending = false;
+
+let musicOn = false;
+
+
+/* =====================================================
+   ELEMENTS
+   ===================================================== */
+
+const map = document.getElementById("map");
+const playerElement = document.getElementById("player");
+
+const battleScreen =
+    document.getElementById("battleScreen");
+
+const notification =
+    document.getElementById("notification");
+
+
+/* =====================================================
+   MAP POSITION
+   ===================================================== */
+
+function updatePlayerPosition() {
+
+    playerElement.style.left =
+        player.x + "px";
+
+    playerElement.style.top =
+        player.y + "px";
+
+    updateCamera();
+
+}
+
+
+/* =====================================================
+   CAMERA
+   ===================================================== */
+
+function updateCamera() {
+
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+
+    let cameraX =
+        screenWidth / 2 -
+        player.x -
+        26;
+
+    let cameraY =
+        screenHeight / 2 -
+        player.y -
+        26;
+
+    const mapWidth = 1800;
+    const mapHeight = 1200;
+
+    const minX =
+        screenWidth - mapWidth;
+
+    const minY =
+        screenHeight - mapHeight;
+
+    cameraX =
+        Math.min(
+            0,
+            Math.max(minX, cameraX)
+        );
+
+    cameraY =
+        Math.min(
+            0,
+            Math.max(minY, cameraY)
+        );
+
+    map.style.transform =
+        `translate(${cameraX}px, ${cameraY}px)`;
+
+}
+
+
+/* =====================================================
+   MOVEMENT
+   ===================================================== */
+
+function movePlayer(direction) {
+
+    if (
+        battleScreen.style.display === "block"
+    ) {
+        return;
+    }
+
+    const amount = player.speed;
+
+    if (direction === "up") {
+        player.y -= amount;
+    }
+
+    if (direction === "down") {
+        player.y += amount;
+    }
+
+    if (direction === "left") {
+        player.x -= amount;
+    }
+
+    if (direction === "right") {
+        player.x += amount;
+    }
+
+
+    /* Map boundaries */
+
+    player.x =
+        Math.max(
+            0,
+            Math.min(1748, player.x)
+        );
+
+    player.y =
+        Math.max(
+            0,
+            Math.min(1148, player.y)
+        );
+
+
+    updatePlayerPosition();
+
+    checkEnemyCollision();
+
+}
+
+
+/* =====================================================
+   TOUCH CONTROLS
+   ===================================================== */
+
+document.querySelectorAll(".control")
+.forEach(button => {
+
+    button.addEventListener(
+        "pointerdown",
+        event => {
+
+            event.preventDefault();
+
+            movePlayer(
+                button.dataset.dir
+            );
+
+        }
+    );
+
+});
+
+
+/* =====================================================
+   KEYBOARD CONTROLS
+   ===================================================== */
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if (event.key === "ArrowUp" ||
+            event.key.toLowerCase() === "w") {
+
+            movePlayer("up");
+
+        }
+
+        if (event.key === "ArrowDown" ||
+            event.key.toLowerCase() === "s") {
+
+            movePlayer("down");
+
+        }
+
+        if (event.key === "ArrowLeft" ||
+            event.key.toLowerCase() === "a") {
+
+            movePlayer("left");
+
+        }
+
+        if (event.key === "ArrowRight" ||
+            event.key.toLowerCase() === "d") {
+
+            movePlayer("right");
+
+        }
+
+    }
+);
+
+
+/* =====================================================
+   ENEMY COLLISION
+   ===================================================== */
+
+function checkEnemyCollision() {
+
+    const enemies =
+        document.querySelectorAll(".enemy");
+
+    enemies.forEach(enemy => {
+
+        if (enemy.style.display === "none") {
+            return;
+        }
+
+        const enemyX =
+            parseInt(enemy.style.left);
+
+        const enemyY =
+            parseInt(enemy.style.top);
+
+        const distance =
+            Math.hypot(
+                player.x - enemyX,
+                player.y - enemyY
+            );
+
+        if (distance < 55) {
+
+            startBattle(enemy);
+
+        }
+
+    });
+
+}
+
+
+/* =====================================================
+   START BATTLE
+   ===================================================== */
+
+function startBattle(enemy) {
+
+    currentEnemy = enemy;
+
+    const level =
+        Number(enemy.dataset.level);
+
+    battleEnemyMaxHP =
+        70 + level * 5;
+
+    battleEnemyHP =
+        battleEnemyMaxHP;
+
+    battleEnemyAttack =
+        8 + level * 2;
+
+    battleEnemyDefense =
+        Math.floor(level / 2);
+
+    battleDefending = false;
+
+    document.getElementById(
+        "battleEnemyLevel"
+    ).textContent = "?";
+
+    battleScreen.style.display =
+        "block";
+
+    showBattleMessage(
+        "A wild enemy appeared!"
+    );
+
+    updateBattleUI();
+
+}
+
+
+/* =====================================================
+   BATTLE UI
+   ===================================================== */
+
+function updateBattleUI() {
+
+    document.getElementById(
+        "battlePlayerHP"
+    ).textContent =
+        player.hp;
+
+    document.getElementById(
+        "battleEnergy"
+    ).textContent =
+        player.energy;
+
+    document.getElementById(
+        "enemyHPBar"
+    ).style.width =
+        (battleEnemyHP /
+         battleEnemyMaxHP * 100) + "%";
+
+    document.getElementById(
+        "playerHPBar"
+    ).style.width =
+        (player.hp /
+         player.maxHP * 100) + "%";
+
+    document.getElementById(
+        "energyBar"
+    ).style.width =
+        (player.energy /
+         player.maxEnergy * 100) + "%";
+
+}
+
+
+/* =====================================================
+   BATTLE MESSAGE
+   ===================================================== */
+
+function showBattleMessage(message) {
+
+    document.getElementById(
+        "battleMessage"
+    ).textContent =
+        message;
+
+}
+
+
+/* =====================================================
+   PLAYER ATTACK
+   ===================================================== */
+
+document.getElementById(
+    "attackButton"
+).addEventListener(
+    "click",
+    playerAttack
+);
+
+
+function playerAttack() {
+
+    const damage =
+        Math.max(
+            1,
+            player.attack -
+            battleEnemyDefense
+        );
+
+    battleEnemyHP -= damage;
+
+    showBattleMessage(
+        `Hechie dealt ${damage} damage!`
+    );
+
+    updateBattleUI();
+
+    if (battleEnemyHP <= 0) {
+
+        winBattle();
+
+        return;
+
+    }
+
+    setTimeout(
+        enemyTurn,
+        700
+    );
+
+}
+
+
+/* =====================================================
+   DEFEND
+   ===================================================== */
+
+document.getElementById(
+    "defendButton"
+).addEventListener(
+    "click",
+    () => {
+
+        battleDefending = true;
+
+        showBattleMessage(
+            "Hechie is defending!"
+        );
+
+        setTimeout(
+            enemyTurn,
+            700
+        );
+
+    }
+);
+
+
+/* =====================================================
+   BASIC ABILITY
+   ===================================================== */
+
+document.getElementById(
+    "abilityButton"
+).addEventListener(
+    "click",
+    () => {
+
+        const energyCost = 20;
+
+        if (player.energy < energyCost) {
+
+            showBattleMessage(
+                "Not enough Energy!"
+            );
+
+            return;
+
+        }
+
+        player.energy -= energyCost;
+
+        const damage =
+            Math.max(
+                1,
+                player.attack * 1.8 -
+                battleEnemyDefense
+            );
+
+        battleEnemyHP -= damage;
+
+        showBattleMessage(
+            `Power Strike dealt ${Math.floor(damage)} damage!`
+        );
+
+        updateBattleUI();
+
+        if (battleEnemyHP <= 0) {
+
+            winBattle();
+
+            return;
+
+        }
+
+        setTimeout(
+            enemyTurn,
+            700
+        );
+
+    }
+);
+
+
+/* =====================================================
+   ITEM
+   ===================================================== */
+
+document.getElementById(
+    "itemButton"
+).addEventListener(
+    "click",
+    () => {
+
+        if (player.hp >= player.maxHP) {
+
+            showBattleMessage(
+                "Hechie's HP is already full!"
+            );
+
+            return;
+
+        }
+
+        player.hp =
+            Math.min(
+                player.maxHP,
+                player.hp + 50
+            );
+
+        showBattleMessage(
+            "Health Potion restored 50 HP!"
+        );
+
+        updateBattleUI();
+
+        setTimeout(
+            enemyTurn,
+            700
+        );
+
+    }
+);
+
+
+/* =====================================================
+   RUN
+   ===================================================== */
+
+document.getElementById(
+    "runButton"
+).addEventListener(
+    "click",
+    tryRun
+);
+
+
+function tryRun() {
+
+    /*
+       Prototype version:
+
+       Player Speed = 30
+
+       Enemy speed is hidden.
+       For now, the game gives
+       a simple 60% escape chance.
+
+       Later this will use the full
+       roster-vs-enemy Speed system.
+    */
+
+    const chance =
+        Math.random();
+
+    if (chance < .60) {
+
+        showBattleMessage(
+            "You escaped!"
+        );
+
+        setTimeout(
+            endBattle,
+            700
+        );
+
+    } else {
+
+        showBattleMessage(
+            "You couldn't escape!"
+        );
+
+        setTimeout(
+            enemyTurn,
+            700
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   ENEMY TURN
+   ===================================================== */
+
+function enemyTurn() {
+
+    if (battleEnemyHP <= 0) {
+        return;
+    }
+
+    let damage =
+        Math.max(
+            1,
+            battleEnemyAttack -
+            player.defense
+        );
+
+    if (battleDefending) {
+
+        damage =
+            Math.max(
+                1,
+                Math.floor(
+                    damage / 2
+                )
+            );
+
+    }
+
+    player.hp -= damage;
+
+    battleDefending = false;
+
+    showBattleMessage(
+        `Enemy dealt ${damage} damage!`
+    );
+
+    updateBattleUI();
+
+    if (player.hp <= 0) {
+
+        player.hp = 1;
+
+        showBattleMessage(
+            "Hechie was knocked out!"
+        );
+
+        setTimeout(
+            gameOver,
+            900
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   WIN BATTLE
+   ===================================================== */
+
+function winBattle() {
+
+    const level =
+        Number(
+            currentEnemy.dataset.level
+        );
+
+    const enemyEXP =
+        level * 10;
+
+    const battleReward =
+        1 + ((level - 1) * 3);
+
+    const coins =
+        10 + level * 3;
+
+    player.exp += enemyEXP;
+    player.coins += coins;
+
+    showBattleMessage(
+        `Victory! +${enemyEXP} EXP and +${coins} DD-coins`
+    );
+
+    currentEnemy.style.display =
+        "none";
+
+    updateHUD();
+
+    setTimeout(
+        () => {
+
+            checkLevelUp();
+
+            endBattle();
+
+        },
+        1200
+    );
+
+}
+
+
+/* =====================================================
+   LEVEL UP
+   ===================================================== */
+
+function checkLevelUp() {
+
+    const requirements = {
+
+        2: 100,
+        3: 250,
+        4: 550,
+        5: 1000,
+        6: 1600,
+        7: 2350,
+        8: 3275,
+        9: 4425,
+        10: 5825
+
+    };
+
+    while (
+        player.level < 10 &&
+        player.exp >=
+        requirements[player.level + 1]
+    ) {
+
+        player.level++;
+
+        /*
+           Small stat increases at
+           early levels.
+        */
+
+        player.maxHP += 10;
+
+        player.attack += 2;
+
+        player.defense += 1;
+
+        player.speedStat += 1;
+
+        player.hp =
+            player.maxHP;
+
+        player.energy =
+            player.maxEnergy;
+
+        notify(
+            `⭐ Hechie reached Level ${player.level}!`
+        );
+
+    }
+
+    updateHUD();
+
+}
+
+
+/* =====================================================
+   END BATTLE
+   ===================================================== */
+
+function endBattle() {
+
+    battleScreen.style.display =
+        "none";
+
+    battleDefending = false;
+
+    updateHUD();
+
+}
+
+
+/* =====================================================
+   GAME OVER
+   ===================================================== */
+
+function gameOver() {
+
+    alert(
+        "Game Over!\n\nReturning to the previous checkpoint."
+    );
+
+    player.hp =
+        player.maxHP;
+
+    player.energy =
+        player.maxEnergy;
+
+    /*
+       Prototype checkpoint:
+       Softoy Village.
+    */
+
+    player.x = 905;
+    player.y = 600;
+
+    endBattle();
+
+    updatePlayerPosition();
+
+}
+
+
+/* =====================================================
+   HUD
+   ===================================================== */
+
+function updateHUD() {
+
+    document.getElementById(
+        "hudHP"
+    ).textContent =
+        player.hp;
+
+    document.getElementById(
+        "hudEXP"
+    ).textContent =
+        player.exp;
+
+    document.getElementById(
+        "hudCoins"
+    ).textContent =
+        player.coins;
+
+}
+
+
+/* =====================================================
+   NOTIFICATION
+   ===================================================== */
+
+function notify(message) {
+
+    notification.textContent =
+        message;
+
+    notification.style.display =
+        "block";
+
+    setTimeout(
+        () => {
+
+            notification.style.display =
+                "none";
+
+        },
+        1800
+    );
+
+}
+
+
+/* =====================================================
+   SETTINGS
+   ===================================================== */
+
+document.getElementById(
+    "settingsButton"
+).addEventListener(
+    "click",
+    () => {
+
+        document.getElementById(
+            "settingsPanel"
+        ).style.display =
+            "flex";
+
+    }
+);
+
+
+document.getElementById(
+    "closeSettings"
+).addEventListener(
+    "click",
+    () => {
+
+        document.getElementById(
+            "settingsPanel"
+        ).style.display =
+            "none";
+
+    }
+);
+
+
+/* =====================================================
+   MUSIC TOGGLE
+   ===================================================== */
+
+document.getElementById(
+    "musicButton"
+).addEventListener(
+    "click",
+    () => {
+
+        musicOn = !musicOn;
+
+        document.getElementById(
+            "musicButton"
+        ).textContent =
+            musicOn
+                ? "🎵 Music: ON"
+                : "🎵 Music: OFF";
+
+    }
+);
+
+
+/* =====================================================
+   SAVE
+   ===================================================== */
+
+document.getElementById(
+    "saveButton"
+).addEventListener(
+    "click",
+    () => {
+
+        localStorage.setItem(
+            "softoyPrototypeSave",
+            JSON.stringify(player)
+        );
+
+        notify(
+            "💾 Game saved!"
+        );
+
+    }
+);
+
+
+/* =====================================================
+   LOAD SAVE
+   ===================================================== */
+
+function loadSave() {
+
+    const saved =
+        localStorage.getItem(
+            "softoyPrototypeSave"
+        );
+
+    if (!saved) {
+        return;
+    }
+
+    try {
+
+        const data =
+            JSON.parse(saved);
+
+        Object.assign(
+            player,
+            data
+        );
+
+    } catch (error) {
+
+        console.log(
+            "Save could not be loaded."
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   INITIALIZE
+   ===================================================== */
+
+loadSave();
+
+updatePlayerPosition();
+
+updateHUD();
+
+
+/* =====================================================
+   SIMPLE CAMERA LOOP
+   ===================================================== */
+
+setInterval(
+    () => {
+
+        updateCamera();
+
+    },
+    30
+);
+
+</script>
+
+</body>
+</html>
